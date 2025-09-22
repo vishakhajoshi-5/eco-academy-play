@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Flame, Star } from 'lucide-react';
 
 export const Navbar = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { points, streak, level } = usePoints();
 
   if (!user) return null;
@@ -32,12 +32,12 @@ export const Navbar = () => {
       {/* User Profile */}
       <div className="flex items-center gap-3">
         <div className="text-right">
-          <div className="text-sm font-medium">{user.name}</div>
-          <div className="text-xs text-muted-foreground capitalize">{user.role}</div>
+          <div className="text-sm font-medium">{profile?.full_name || user.email}</div>
+          <div className="text-xs text-muted-foreground capitalize">{profile?.role || 'student'}</div>
         </div>
         <Avatar className="h-8 w-8 border-2 border-primary/20">
           <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs font-bold">
-            {user.name.charAt(0).toUpperCase()}
+            {(profile?.full_name || user.email || 'U').charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </div>

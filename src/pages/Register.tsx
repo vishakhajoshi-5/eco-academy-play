@@ -19,19 +19,20 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await register(email, password, name, role);
+    const { error } = await register(email, password, name, role);
+    
+    if (error) {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Please try again with different details.",
+        variant: "destructive",
+      });
+    } else {
       toast({
         title: "Account created!",
         description: "Welcome to EcoLearn. Your eco journey begins now!",
       });
       navigate(role === 'educator' ? '/dashboard/educator' : '/dashboard/student');
-    } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: "Please try again with different details.",
-        variant: "destructive",
-      });
     }
   };
 

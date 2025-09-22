@@ -19,6 +19,7 @@ import StoryMode from "./pages/StoryMode";
 import Leaderboards from "./pages/Leaderboards";
 import WeeklyChallenges from "./pages/WeeklyChallenges";
 import NotFound from "./pages/NotFound";
+import ProfileSettings from "./pages/ProfileSettings";
 
 // Layout
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -49,6 +50,7 @@ const App = () => (
                   <Route path="story" element={<StoryMode />} />
                   <Route path="leaderboards" element={<Leaderboards />} />
                   <Route path="challenges" element={<WeeklyChallenges />} />
+                  <Route path="profile" element={<ProfileSettings />} />
                 </Route>
                 
                 {/* 404 Route */}

@@ -31,7 +31,7 @@ interface LeaderboardEntry {
 }
 
 const Leaderboards = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { points, level, badges, streak } = usePoints();
   const [timeframe, setTimeframe] = useState<'weekly' | 'monthly' | 'all-time'>('weekly');
 
@@ -78,7 +78,7 @@ const Leaderboards = () => {
     },
     {
       id: '5',
-      name: user?.name || 'Your Name',
+      name: profile?.full_name || user?.email || 'Your Name',
       points: points,
       level: level,
       badges: badges.length,

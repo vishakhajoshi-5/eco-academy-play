@@ -16,19 +16,20 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await login(email, password);
+    const { error } = await login(email, password);
+    
+    if (error) {
+      toast({
+        title: "Login failed",
+        description: error.message || "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    } else {
       toast({
         title: "Welcome back!",
         description: "Successfully logged in to EcoLearn.",
       });
       navigate('/dashboard/student');
-    } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "Please check your credentials and try again.",
-        variant: "destructive",
-      });
     }
   };
 

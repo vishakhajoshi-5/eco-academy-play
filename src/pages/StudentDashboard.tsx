@@ -17,7 +17,7 @@ import {
 import { Link } from 'react-router-dom';
 
 const StudentDashboard = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { points, badges, streak, level } = usePoints();
 
   const currentLevelProgress = (points % 500) / 500 * 100;
@@ -44,7 +44,7 @@ const StudentDashboard = () => {
       {/* Welcome Section */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Welcome back, {user?.name}! 🌱</h1>
+          <h1 className="text-3xl font-bold">Welcome back, {profile?.full_name || user?.email}! 🌱</h1>
           <p className="text-muted-foreground mt-2">
             Continue your eco learning journey and make a difference
           </p>

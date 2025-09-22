@@ -7,9 +7,10 @@ import {
   Calendar,
   Home,
   Settings,
-  LogOut
+  LogOut,
+  User
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 import {
@@ -39,13 +40,18 @@ const educatorItems = [
   { title: "Leaderboards", url: "/dashboard/leaderboards", icon: Trophy },
 ];
 
+const commonItems = [
+  { title: "Profile", url: "/dashboard/profile", icon: User },
+];
+
 export function AppSidebar() {
   const { open } = useSidebar();
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
 
-  const items = user?.role === 'educator' ? educatorItems : studentItems;
+  const items = profile?.role === 'educator' ? educatorItems : studentItems;
   
   const isActive = (path: string) => currentPath === path;
   const getNavCls = (active: boolean) =>
@@ -98,6 +104,31 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Settings Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel className={!open ? "sr-only" : ""}>
+            Settings
+          </SidebarGroupLabel>
+          
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {commonItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild className="h-12">
+                    <NavLink 
+                      to={item.url} 
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${getNavCls(isActive(item.url))}`}
+                    >
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      {open && <span className="font-medium">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {/* User Section */}
         <div className="mt-auto pt-4 border-t border-border/50">
           <SidebarGroup>
@@ -106,7 +137,10 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton 
                     className="h-12"
-                    onClick={logout}
+                    onClick={async () => {
+                      await logout();
+                      navigate('/');
+                    }}
                   >
                     <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-all">
                       <LogOut className="h-5 w-5 flex-shrink-0" />
