@@ -14,7 +14,7 @@ const Index = () => {
               <Leaf className="h-8 w-8 text-primary-foreground" />
             </div>
             <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              EcoLearn
+              TARUN(Training for Awareness on Responsible Use of Nature)
             </h1>
           </div>
           
