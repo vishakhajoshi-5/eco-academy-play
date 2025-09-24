@@ -70,10 +70,10 @@ export function AppSidebar() {
           <div className="mb-8 px-2">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">E</span>
+                <span className="text-primary-foreground font-bold text-sm">T</span>
               </div>
               <span className="font-bold text-lg bg-gradient-primary bg-clip-text text-transparent">
-                EcoLearn
+                TARUN
               </span>
             </div>
           </div>
