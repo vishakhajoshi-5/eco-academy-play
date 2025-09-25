@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -7,67 +7,152 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Bell, Globe, Palette, Volume2, Save, Moon, Sun } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { userPreferencesSchema } from '@/lib/validation';
+import { z } from 'zod';
 
-interface ProfilePreferencesProps {
-  onSave: (preferences: any) => void;
+// ... keep existing code
+
+interface PreferencesData {
+  notifications: {
+    email: boolean;
+    push: boolean;
+    achievements: boolean;
+    reminders: boolean;
+  };
+  display: {
+    theme: 'light' | 'dark' | 'system';
+    language: string;
+    animations: boolean;
+    accessibility: boolean;
+  };
+  learning: {
+    difficulty: 'easy' | 'medium' | 'hard';
+    reminders: boolean;
+    progress_tracking: boolean;
+    gamification: boolean;
+  };
+  privacy: {
+    profile_visibility: 'public' | 'private';
+    progress_sharing: boolean;
+    leaderboard_participation: boolean;
+    data_collection: boolean;
+  };
 }
 
-const ProfilePreferences = ({ onSave }: ProfilePreferencesProps) => {
-  const [preferences, setPreferences] = useState({
+const ProfilePreferences = () => {
+  const { user } = useAuth();
+  const [preferences, setPreferences] = useState<PreferencesData>({
     notifications: {
       email: true,
       push: true,
-      taskReminders: true,
-      weeklyReports: true,
-      achievementAlerts: true,
+      achievements: true,
+      reminders: true,
     },
     display: {
-      theme: 'light',
+      theme: 'system',
       language: 'en',
-      animation: true,
-      compactMode: false,
-    },
-    privacy: {
-      profileVisibility: 'public',
-      shareProgress: true,
-      allowMessages: true,
+      animations: true,
+      accessibility: false,
     },
     learning: {
-      difficultyPreference: 'adaptive',
-      autoNextTask: true,
-      showHints: true,
-      studyReminders: true,
-    }
+      difficulty: 'medium',
+      reminders: true,
+      progress_tracking: true,
+      gamification: true,
+    },
+    privacy: {
+      profile_visibility: 'public',
+      progress_sharing: true,
+      leaderboard_participation: true,
+      data_collection: true,
+    },
   });
 
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const updatePreference = (category: string, key: string, value: any) => {
+  // Load preferences from database on component mount
+  useEffect(() => {
+    const loadPreferences = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('user_preferences')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error loading preferences:', error);
+          return;
+        }
+
+        if (data) {
+          setPreferences({
+            notifications: data.notifications as PreferencesData['notifications'],
+            display: data.display as PreferencesData['display'],
+            learning: data.learning as PreferencesData['learning'],
+            privacy: data.privacy as PreferencesData['privacy'],
+          });
+        }
+      } catch (error) {
+        console.error('Error loading preferences:', error);
+      }
+    };
+
+    loadPreferences();
+  }, [user]);
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    setIsLoading(true);
+    try {
+      // Validate preferences data
+      const validatedData = userPreferencesSchema.parse(preferences);
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user.id,
+          notifications: validatedData.notifications,
+          display: validatedData.display,
+          learning: validatedData.learning,
+          privacy: validatedData.privacy,
+        });
+
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Preferences saved",
+        description: "Your preferences have been successfully updated.",
+      });
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+      toast({
+        title: "Error saving preferences", 
+        description: error instanceof z.ZodError 
+          ? "Invalid preference data. Please check your settings."
+          : "There was an error saving your preferences. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updatePreference = (category: keyof PreferencesData, key: string, value: any) => {
     setPreferences(prev => ({
       ...prev,
       [category]: {
-        ...prev[category as keyof typeof prev],
+        ...prev[category],
         [key]: value
       }
     }));
-  };
-
-  const handleSave = async () => {
-    setIsUpdating(true);
-    try {
-      await onSave(preferences);
-      toast({
-        title: "Preferences saved",
-        description: "Your preferences have been updated successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error saving preferences",
-        description: "Failed to save your preferences. Please try again.",
-        variant: "destructive",
-      });
-    }
-    setIsUpdating(false);
   };
 
   return (
@@ -107,35 +192,24 @@ const ProfilePreferences = ({ onSave }: ProfilePreferencesProps) => {
           </div>
           
           <div className="flex items-center justify-between">
-            <Label htmlFor="task-reminders" className="text-sm font-medium">
-              Task reminders
-            </Label>
-            <Switch
-              id="task-reminders"
-              checked={preferences.notifications.taskReminders}
-              onCheckedChange={(checked) => updatePreference('notifications', 'taskReminders', checked)}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <Label htmlFor="weekly-reports" className="text-sm font-medium">
-              Weekly progress reports
-            </Label>
-            <Switch
-              id="weekly-reports"
-              checked={preferences.notifications.weeklyReports}
-              onCheckedChange={(checked) => updatePreference('notifications', 'weeklyReports', checked)}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
             <Label htmlFor="achievement-alerts" className="text-sm font-medium">
-              Achievement alerts
+              Achievement notifications
             </Label>
             <Switch
               id="achievement-alerts"
-              checked={preferences.notifications.achievementAlerts}
-              onCheckedChange={(checked) => updatePreference('notifications', 'achievementAlerts', checked)}
+              checked={preferences.notifications.achievements}
+              onCheckedChange={(checked) => updatePreference('notifications', 'achievements', checked)}
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <Label htmlFor="reminders" className="text-sm font-medium">
+              Study reminders
+            </Label>
+            <Switch
+              id="reminders"
+              checked={preferences.notifications.reminders}
+              onCheckedChange={(checked) => updatePreference('notifications', 'reminders', checked)}
             />
           </div>
         </CardContent>
@@ -205,19 +279,19 @@ const ProfilePreferences = ({ onSave }: ProfilePreferencesProps) => {
             </Label>
             <Switch
               id="animations"
-              checked={preferences.display.animation}
-              onCheckedChange={(checked) => updatePreference('display', 'animation', checked)}
+              checked={preferences.display.animations}
+              onCheckedChange={(checked) => updatePreference('display', 'animations', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="compact-mode" className="text-sm font-medium">
-              Compact mode
+            <Label htmlFor="accessibility" className="text-sm font-medium">
+              Accessibility mode
             </Label>
             <Switch
-              id="compact-mode"
-              checked={preferences.display.compactMode}
-              onCheckedChange={(checked) => updatePreference('display', 'compactMode', checked)}
+              id="accessibility"
+              checked={preferences.display.accessibility}
+              onCheckedChange={(checked) => updatePreference('display', 'accessibility', checked)}
             />
           </div>
         </CardContent>
@@ -238,8 +312,8 @@ const ProfilePreferences = ({ onSave }: ProfilePreferencesProps) => {
           <div className="space-y-2">
             <Label htmlFor="difficulty" className="text-sm font-medium">Difficulty preference</Label>
             <Select 
-              value={preferences.learning.difficultyPreference} 
-              onValueChange={(value) => updatePreference('learning', 'difficultyPreference', value)}
+              value={preferences.learning.difficulty} 
+              onValueChange={(value) => updatePreference('learning', 'difficulty', value as 'easy' | 'medium' | 'hard')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select difficulty" />
@@ -248,41 +322,40 @@ const ProfilePreferences = ({ onSave }: ProfilePreferencesProps) => {
                 <SelectItem value="easy">Easy - Gradual learning</SelectItem>
                 <SelectItem value="medium">Medium - Balanced challenge</SelectItem>
                 <SelectItem value="hard">Hard - Maximum challenge</SelectItem>
-                <SelectItem value="adaptive">Adaptive - AI adjusts difficulty</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="auto-next" className="text-sm font-medium">
-              Auto-advance to next task
+            <Label htmlFor="learning-reminders" className="text-sm font-medium">
+              Learning reminders
             </Label>
             <Switch
-              id="auto-next"
-              checked={preferences.learning.autoNextTask}
-              onCheckedChange={(checked) => updatePreference('learning', 'autoNextTask', checked)}
+              id="learning-reminders"
+              checked={preferences.learning.reminders}
+              onCheckedChange={(checked) => updatePreference('learning', 'reminders', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="show-hints" className="text-sm font-medium">
-              Show hints during tasks
+            <Label htmlFor="progress-tracking" className="text-sm font-medium">
+              Progress tracking
             </Label>
             <Switch
-              id="show-hints"
-              checked={preferences.learning.showHints}
-              onCheckedChange={(checked) => updatePreference('learning', 'showHints', checked)}
+              id="progress-tracking"
+              checked={preferences.learning.progress_tracking}
+              onCheckedChange={(checked) => updatePreference('learning', 'progress_tracking', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="study-reminders" className="text-sm font-medium">
-              Daily study reminders
+            <Label htmlFor="gamification" className="text-sm font-medium">
+              Gamification features
             </Label>
             <Switch
-              id="study-reminders"
-              checked={preferences.learning.studyReminders}
-              onCheckedChange={(checked) => updatePreference('learning', 'studyReminders', checked)}
+              id="gamification"
+              checked={preferences.learning.gamification}
+              onCheckedChange={(checked) => updatePreference('learning', 'gamification', checked)}
             />
           </div>
         </CardContent>
@@ -303,39 +376,49 @@ const ProfilePreferences = ({ onSave }: ProfilePreferencesProps) => {
           <div className="space-y-2">
             <Label htmlFor="profile-visibility" className="text-sm font-medium">Profile visibility</Label>
             <Select 
-              value={preferences.privacy.profileVisibility} 
-              onValueChange={(value) => updatePreference('privacy', 'profileVisibility', value)}
+              value={preferences.privacy.profile_visibility} 
+              onValueChange={(value) => updatePreference('privacy', 'profile_visibility', value as 'public' | 'private')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select visibility" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="public">Public - Visible to all users</SelectItem>
-                <SelectItem value="friends">Friends only</SelectItem>
                 <SelectItem value="private">Private - Only you can see</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="share-progress" className="text-sm font-medium">
+            <Label htmlFor="progress-sharing" className="text-sm font-medium">
               Share progress on leaderboards
             </Label>
             <Switch
-              id="share-progress"
-              checked={preferences.privacy.shareProgress}
-              onCheckedChange={(checked) => updatePreference('privacy', 'shareProgress', checked)}
+              id="progress-sharing"
+              checked={preferences.privacy.progress_sharing}
+              onCheckedChange={(checked) => updatePreference('privacy', 'progress_sharing', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="allow-messages" className="text-sm font-medium">
-              Allow messages from other users
+            <Label htmlFor="leaderboard-participation" className="text-sm font-medium">
+              Participate in leaderboards
             </Label>
             <Switch
-              id="allow-messages"
-              checked={preferences.privacy.allowMessages}
-              onCheckedChange={(checked) => updatePreference('privacy', 'allowMessages', checked)}
+              id="leaderboard-participation"
+              checked={preferences.privacy.leaderboard_participation}
+              onCheckedChange={(checked) => updatePreference('privacy', 'leaderboard_participation', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="data-collection" className="text-sm font-medium">
+              Allow data collection for analytics
+            </Label>
+            <Switch
+              id="data-collection"
+              checked={preferences.privacy.data_collection}
+              onCheckedChange={(checked) => updatePreference('privacy', 'data_collection', checked)}
             />
           </div>
         </CardContent>
@@ -347,11 +430,11 @@ const ProfilePreferences = ({ onSave }: ProfilePreferencesProps) => {
       <div className="flex justify-end">
         <Button
           onClick={handleSave}
-          disabled={isUpdating}
+          disabled={isLoading}
           className="flex items-center gap-2"
         >
           <Save className="h-4 w-4" />
-          {isUpdating ? 'Saving...' : 'Save Preferences'}
+          {isLoading ? 'Saving...' : 'Save Preferences'}
         </Button>
       </div>
     </div>

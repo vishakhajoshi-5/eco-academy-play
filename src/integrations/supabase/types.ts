@@ -237,6 +237,39 @@ export type Database = {
           },
         ]
       }
+      user_preferences: {
+        Row: {
+          created_at: string
+          display: Json
+          id: string
+          learning: Json
+          notifications: Json
+          privacy: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display?: Json
+          id?: string
+          learning?: Json
+          notifications?: Json
+          privacy?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display?: Json
+          id?: string
+          learning?: Json
+          notifications?: Json
+          privacy?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       weekly_challenges: {
         Row: {
           created_at: string
@@ -325,7 +358,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

@@ -29,7 +29,7 @@ import {
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfilePreferences from '@/components/profile/ProfilePreferences';
 import ProfileProgress from '@/components/profile/ProfileProgress';
-import { supabase } from '@/integrations/supabase/client';
+import { validateAndSanitizeProfileName } from '@/lib/validation';
 
 const ProfileSettings = () => {
   const { user, profile, logout, updateProfile, isLoading } = useAuth();
@@ -39,22 +39,27 @@ const ProfileSettings = () => {
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim()) {
+    
+    // Validate and sanitize input
+    const validation = validateAndSanitizeProfileName(fullName);
+    if (!validation.isValid) {
       toast({
-        title: "Error",
-        description: "Please enter your full name.",
+        title: "Invalid input",
+        description: validation.error,
         variant: "destructive",
       });
       return;
     }
 
     setIsUpdating(true);
-    const { error } = await updateProfile({ full_name: fullName });
+    const { error } = await updateProfile({ 
+      full_name: validation.sanitizedName 
+    });
     
     if (error) {
       toast({
         title: "Error updating profile",
-        description: error.message,
+        description: error.message || "There was an error updating your profile.",
         variant: "destructive",
       });
     } else {
@@ -67,11 +72,8 @@ const ProfileSettings = () => {
   };
 
   const handleSavePreferences = async (preferences: any) => {
-    // Preferences functionality will be available after database migration
-    toast({
-      title: "Preferences saved",
-      description: "Your preferences have been saved locally. Database integration coming soon.",
-    });
+    // Preferences are now saved directly in the ProfilePreferences component
+    console.log('Preferences saved:', preferences);
   };
 
   const handleLogout = async () => {
@@ -224,7 +226,7 @@ const ProfileSettings = () => {
 
               {/* Preferences Tab */}
               <TabsContent value="preferences" className="space-y-6">
-                <ProfilePreferences onSave={handleSavePreferences} />
+                <ProfilePreferences />
               </TabsContent>
             </Tabs>
           </div>
