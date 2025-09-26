@@ -27,7 +27,7 @@ const faqData = [
   },
   {
     keywords: ['streak', 'daily', 'login'],
-    response: "Your learning streak tracks consecutive days of activity on EcoLearn. Complete at least one task or challenge each day to maintain your streak and earn bonus points! 🔥"
+    response: "Your learning streak tracks consecutive days of activity on TARUN. Complete at least one task or challenge each day to maintain your streak and earn bonus points! 🔥"
   },
   {
     keywords: ['story', 'episodes', 'adventure'],
@@ -71,7 +71,7 @@ export const ChatbotWidget = () => {
 
     const botResponse: Message = {
       id: (Date.now() + 1).toString(),
-      text: matchedFaq?.response || "That's a great question! While I have basic information about environmental topics and EcoLearn features, for detailed questions, I recommend checking with your educator or exploring the tasks section for more comprehensive learning materials. 🌍",
+      text: matchedFaq?.response || "That's a great question! While I have basic information about environmental topics and TARUN features, for detailed questions, I recommend checking with your educator or exploring the tasks section for more comprehensive learning materials. 🌍",
       sender: 'bot',
       timestamp: new Date(),
     };

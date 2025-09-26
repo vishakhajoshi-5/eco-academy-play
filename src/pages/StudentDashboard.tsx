@@ -46,7 +46,7 @@ const StudentDashboard = () => {
         <div>
           <h1 className="text-3xl font-bold">Welcome back, {profile?.full_name || user?.email}! 🌱</h1>
           <p className="text-muted-foreground mt-2">
-            Continue your eco learning journey and make a difference
+            Continue your environmental learning journey and make a difference
           </p>
         </div>
         <div className="text-right">

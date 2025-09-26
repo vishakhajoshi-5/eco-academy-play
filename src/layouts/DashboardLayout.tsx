@@ -38,7 +38,7 @@ const DashboardLayout = () => {
             <SidebarTrigger className="lg:hidden" />
             <div className="hidden lg:block">
               <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                EcoLearn
+                TARUN
               </h1>
             </div>
           </div>

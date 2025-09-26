@@ -30,7 +30,7 @@ const Register = () => {
     } else {
       toast({
         title: "Account created!",
-        description: "Welcome to EcoLearn. Your eco journey begins now!",
+        description: "Welcome to TARUN. Your environmental journey begins now!",
       });
       navigate(role === 'educator' ? '/dashboard/educator' : '/dashboard/student');
     }
@@ -46,10 +46,10 @@ const Register = () => {
               <Leaf className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              EcoLearn
+              TARUN
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Join EcoLearn</h1>
+          <h1 className="text-2xl font-bold text-foreground">Join TARUN</h1>
           <p className="text-muted-foreground mt-2">Start your environmental learning journey today</p>
         </div>
 

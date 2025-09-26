@@ -27,7 +27,7 @@ const Login = () => {
     } else {
       toast({
         title: "Welcome back!",
-        description: "Successfully logged in to EcoLearn.",
+        description: "Successfully logged in to TARUN.",
       });
       navigate('/dashboard/student');
     }
@@ -43,7 +43,7 @@ const Login = () => {
               <Leaf className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              EcoLearn
+              TARUN
             </span>
           </div>
           <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
@@ -65,7 +65,7 @@ const Login = () => {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="student@ecolearn.com"
+                    placeholder="student@tarun.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"

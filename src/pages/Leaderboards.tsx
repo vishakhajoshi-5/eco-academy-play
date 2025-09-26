@@ -137,7 +137,7 @@ const Leaderboards = () => {
         <div>
           <h1 className="text-3xl font-bold">Leaderboards 🏆</h1>
           <p className="text-muted-foreground mt-2">
-            See how you rank against other eco learners
+            See how you rank against other environmental learners
           </p>
         </div>
         <div className="text-right">
