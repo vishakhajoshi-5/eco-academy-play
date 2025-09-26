@@ -10,6 +10,37 @@ export const profileUpdateSchema = z.object({
     .regex(/^[a-zA-Z\s'-]+$/, { message: "Name can only contain letters, spaces, hyphens and apostrophes" }),
 });
 
+// Password validation schema
+export const passwordUpdateSchema = z.object({
+  currentPassword: z.string().min(1, { message: "Current password is required" }),
+  newPassword: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, { 
+      message: "Password must contain at least one uppercase letter, one lowercase letter, and one number" 
+    }),
+  confirmPassword: z.string().min(1, { message: "Password confirmation is required" }),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+// File upload validation
+export const validateImageFile = (file: File): { isValid: boolean; error?: string } => {
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  
+  if (file.size > maxSize) {
+    return { isValid: false, error: 'Image must be smaller than 5MB' };
+  }
+  
+  if (!allowedTypes.includes(file.type)) {
+    return { isValid: false, error: 'Only JPEG, PNG, WebP and GIF images are allowed' };
+  }
+  
+  return { isValid: true };
+};
+
 // User preferences validation schema
 export const userPreferencesSchema = z.object({
   notifications: z.object({

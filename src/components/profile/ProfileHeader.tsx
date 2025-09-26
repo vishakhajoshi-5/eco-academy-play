@@ -1,8 +1,9 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { User, Mail, Star, Award, Shield, Calendar, Trophy, Target } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProfileHeaderProps {
   profile: {
@@ -24,12 +25,22 @@ const ProfileHeader = ({ profile, user }: ProfileHeaderProps) => {
   const badgeCount = Array.isArray(profile.badges) ? profile.badges.length : 0;
   const currentLevel = Math.floor(profile.points / 500) + 1;
   const pointsToNextLevel = 500 - (profile.points % 500);
+  
+  // Get avatar URL from Supabase Storage
+  const getAvatarUrl = (avatarPath: string | null) => {
+    if (!avatarPath) return null;
+    const { data } = supabase.storage.from('avatars').getPublicUrl(avatarPath);
+    return data.publicUrl;
+  };
+
+  const avatarUrl = getAvatarUrl(profile.avatar_url);
 
   return (
     <Card className="w-full">
       <CardHeader className="text-center pb-4">
         <div className="flex justify-center mb-4">
           <Avatar className="h-24 w-24 border-4 border-primary/20 shadow-eco-medium">
+            {avatarUrl && <AvatarImage src={avatarUrl} alt={profile.full_name} />}
             <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl font-bold">
               {profile.full_name.charAt(0).toUpperCase()}
             </AvatarFallback>
