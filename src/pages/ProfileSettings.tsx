@@ -1,12 +1,10 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   User, 
@@ -14,11 +12,12 @@ import {
   TrendingUp, 
   LogOut, 
   Save,
-  Upload,
   Camera,
   Key,
   Eye,
-  EyeOff
+  EyeOff,
+  Mail,
+  Shield
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -32,7 +31,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfilePreferences from '@/components/profile/ProfilePreferences';
 import ProfileProgress from '@/components/profile/ProfileProgress';
 import { validateAndSanitizeProfileName, validateImageFile, passwordUpdateSchema } from '@/lib/validation';
@@ -206,292 +204,302 @@ const ProfileSettings = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold">TARUN Profile Settings</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your account, preferences, and track your environmental learning progress
-          </p>
-        </div>
+    <div className="p-6 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2"
+        >
+          Profile Settings 👤
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-muted-foreground"
+        >
+          Manage your account, preferences, and track your environmental learning progress
+        </motion.p>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Profile Overview Sidebar */}
-          <div className="lg:col-span-1">
-            <ProfileHeader profile={profile} user={{ email: user.email || '' }} />
+      <div className="space-y-6">
+        {/* Profile Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-card rounded-xl p-6 shadow-sm border border-border"
+        >
+          <div className="flex items-center space-x-3 mb-4">
+            <User className="h-6 w-6 text-primary" />
+            <h2 className="text-xl font-semibold">Profile Overview</h2>
           </div>
+          
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <Avatar className="h-24 w-24 border-4 border-primary/20">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={profile?.full_name} />}
+              <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl font-bold">
+                {(profile?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            
+            <div className="flex-1 space-y-4">
+              <div>
+                <h3 className="text-lg font-medium">{profile?.full_name || user?.email}</h3>
+                <p className="text-sm text-muted-foreground capitalize">{profile?.role} • {profile?.points || 0} points</p>
+              </div>
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingAvatar}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
+                <Camera className="h-4 w-4" />
+                {isUploadingAvatar ? 'Uploading...' : 'Change Picture'}
+              </motion.button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleAvatarUpload(file);
+                }}
+                className="hidden"
+              />
+            </div>
+          </div>
+        </motion.div>
 
-          {/* Main Content Area */}
-          <div className="lg:col-span-3">
-            <Tabs defaultValue="account" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="account" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Account
-                </TabsTrigger>
-                <TabsTrigger value="progress" className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  Progress
-                </TabsTrigger>
-                <TabsTrigger value="preferences" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Preferences
-                </TabsTrigger>
-              </TabsList>
+        {/* Account Information */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-card rounded-xl p-6 shadow-sm border border-border"
+        >
+          <div className="flex items-center space-x-3 mb-4">
+            <Mail className="h-6 w-6 text-blue-600" />
+            <h2 className="text-xl font-semibold">Account Information</h2>
+          </div>
+          
+          <form onSubmit={handleUpdateProfile} className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium text-muted-foreground mb-2 block">Email Address</Label>
+              <Input
+                type="email"
+                value={user?.email}
+                disabled
+                className="bg-muted/50"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Email address cannot be changed
+              </p>
+            </div>
 
-              {/* Account Tab */}
-              <TabsContent value="account" className="space-y-6">
-                {/* Profile Picture Section */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Profile Picture</CardTitle>
-                    <CardDescription>
-                      Upload a profile picture to personalize your account
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col sm:flex-row items-center gap-6">
-                      <Avatar className="h-24 w-24 border-4 border-primary/20">
-                        {avatarUrl && <AvatarImage src={avatarUrl} alt={profile?.full_name} />}
-                        <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl font-bold">
-                          {(profile?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      <div className="flex flex-col gap-3">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={isUploadingAvatar}
-                          className="flex items-center gap-2"
-                        >
-                          <Camera className="h-4 w-4" />
-                          {isUploadingAvatar ? 'Uploading...' : 'Change Picture'}
-                        </Button>
-                        <p className="text-xs text-muted-foreground">
-                          JPG, PNG, WebP or GIF. Max size 5MB.
-                        </p>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp,image/gif"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleAvatarUpload(file);
-                          }}
-                          className="hidden"
-                        />
-                      </div>
+            <div>
+              <Label className="text-sm font-medium text-muted-foreground mb-2 block">Full Name</Label>
+              <Input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium text-muted-foreground mb-2 block">Role</Label>
+              <Input
+                type="text"
+                value={profile?.role}
+                disabled
+                className="bg-muted/50 capitalize"
+              />
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={isUpdating || fullName === profile?.full_name}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              <Save className="h-4 w-4" />
+              {isUpdating ? 'Saving...' : 'Save Changes'}
+            </motion.button>
+          </form>
+        </motion.div>
+
+        {/* Password & Security */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-card rounded-xl p-6 shadow-sm border border-border"
+        >
+          <div className="flex items-center space-x-3 mb-4">
+            <Key className="h-6 w-6 text-purple-600" />
+            <h2 className="text-xl font-semibold">Password & Security</h2>
+          </div>
+          
+          <form onSubmit={handlePasswordUpdate} className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium text-muted-foreground mb-2 block">Current Password</Label>
+              <div className="relative">
+                <Input
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={passwordData.currentPassword}
+                  onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                  placeholder="Enter your current password"
+                />
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </motion.button>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium text-muted-foreground mb-2 block">New Password</Label>
+              <div className="relative">
+                <Input
+                  type={showNewPassword ? "text" : "password"}
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                  placeholder="Enter your new password"
+                />
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </motion.button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Password must be at least 8 characters with uppercase, lowercase, and number
+              </p>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium text-muted-foreground mb-2 block">Confirm New Password</Label>
+              <div className="relative">
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                  placeholder="Confirm your new password"
+                />
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </motion.button>
+              </div>
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={isUpdatingPassword || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              <Key className="h-4 w-4" />
+              {isUpdatingPassword ? 'Updating...' : 'Update Password'}
+            </motion.button>
+          </form>
+        </motion.div>
+
+        {/* Progress Tracking */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-card rounded-xl p-6 shadow-sm border border-border"
+        >
+          <div className="flex items-center space-x-3 mb-4">
+            <TrendingUp className="h-6 w-6 text-green-600" />
+            <h2 className="text-xl font-semibold">Progress Tracking</h2>
+          </div>
+          <ProfileProgress profile={profile} />
+        </motion.div>
+
+        {/* Preferences */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="bg-card rounded-xl p-6 shadow-sm border border-border"
+        >
+          <div className="flex items-center space-x-3 mb-4">
+            <Settings className="h-6 w-6 text-orange-600" />
+            <h2 className="text-xl font-semibold">User Preferences</h2>
+          </div>
+          <ProfilePreferences />
+        </motion.div>
+
+        {/* Account Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="bg-card rounded-xl p-6 shadow-sm border border-border"
+        >
+          <div className="flex items-center space-x-3 mb-4">
+            <Shield className="h-6 w-6 text-red-600" />
+            <h2 className="text-xl font-semibold">Account Actions</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full text-left p-4 border border-red-200 rounded-lg hover:bg-red-50 transition-colors text-red-600"
+                >
+                  <div className="flex items-center gap-3">
+                    <LogOut className="h-5 w-5" />
+                    <div>
+                      <h3 className="font-medium">Sign Out</h3>
+                      <p className="text-sm text-red-500 mt-1">
+                        Sign out of your TARUN account
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
-
-                {/* Account Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Account Information</CardTitle>
-                    <CardDescription>
-                      Update your personal information and account settings
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleUpdateProfile} className="space-y-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email Address</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={user?.email}
-                          disabled
-                          className="bg-muted"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Email address cannot be changed. Contact support if needed.
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="fullName">Full Name</Label>
-                        <Input
-                          id="fullName"
-                          type="text"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          placeholder="Enter your full name"
-                          required
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="role">Role</Label>
-                        <Input
-                          id="role"
-                          type="text"
-                          value={profile?.role}
-                          disabled
-                          className="bg-muted capitalize"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Role cannot be changed after registration.
-                        </p>
-                      </div>
-
-                      <div className="flex gap-4">
-                        <Button
-                          type="submit"
-                          disabled={isUpdating || fullName === profile?.full_name}
-                          className="flex items-center gap-2"
-                        >
-                          <Save className="h-4 w-4" />
-                          {isUpdating ? 'Saving...' : 'Save Changes'}
-                        </Button>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-
-                {/* Password Update */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Password & Security</CardTitle>
-                    <CardDescription>
-                      Update your password to keep your account secure
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handlePasswordUpdate} className="space-y-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="currentPassword">Current Password</Label>
-                        <div className="relative">
-                          <Input
-                            id="currentPassword"
-                            type={showCurrentPassword ? "text" : "password"}
-                            value={passwordData.currentPassword}
-                            onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                            placeholder="Enter your current password"
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                          >
-                            {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="newPassword">New Password</Label>
-                        <div className="relative">
-                          <Input
-                            id="newPassword"
-                            type={showNewPassword ? "text" : "password"}
-                            value={passwordData.newPassword}
-                            onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                            placeholder="Enter your new password"
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowNewPassword(!showNewPassword)}
-                          >
-                            {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </Button>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Password must be at least 8 characters with uppercase, lowercase, and number.
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                        <div className="relative">
-                          <Input
-                            id="confirmPassword"
-                            type={showConfirmPassword ? "text" : "password"}
-                            value={passwordData.confirmPassword}
-                            onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                            placeholder="Confirm your new password"
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          >
-                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-4">
-                        <Button
-                          type="submit"
-                          disabled={isUpdatingPassword || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                          className="flex items-center gap-2"
-                        >
-                          <Key className="h-4 w-4" />
-                          {isUpdatingPassword ? 'Updating...' : 'Update Password'}
-                        </Button>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-                
-                {/* Sign Out Section */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Account Actions</CardTitle>
-                    <CardDescription>
-                      Manage your account session
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" className="flex items-center gap-2">
-                          <LogOut className="h-4 w-4" />
-                          Sign Out
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Sign Out</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to sign out? You'll need to log in again to access your account.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                            Sign Out
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Progress Tab */}
-              <TabsContent value="progress" className="space-y-6">
-                <ProfileProgress profile={profile} />
-              </TabsContent>
-
-              {/* Preferences Tab */}
-              <TabsContent value="preferences" className="space-y-6">
-                <ProfilePreferences />
-              </TabsContent>
-            </Tabs>
+                  </div>
+                </motion.button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure you want to sign out?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will be redirected to the login page and will need to sign in again to access your account.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
+                    Sign Out
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
