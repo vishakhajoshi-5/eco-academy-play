@@ -31,6 +31,7 @@ const studentItems = [
   { title: "Story Mode", url: "/dashboard/story", icon: BookOpen },
   { title: "Leaderboards", url: "/dashboard/leaderboards", icon: Trophy },
   { title: "Challenges", url: "/dashboard/challenges", icon: Calendar },
+  { title: "Profile", url: "/dashboard/profile", icon: User },
 ];
 
 const educatorItems = [
@@ -38,9 +39,6 @@ const educatorItems = [
   { title: "Tasks", url: "/dashboard/tasks", icon: Target },
   { title: "Submissions", url: "/dashboard/submissions", icon: FileText },
   { title: "Leaderboards", url: "/dashboard/leaderboards", icon: Trophy },
-];
-
-const commonItems = [
   { title: "Profile", url: "/dashboard/profile", icon: User },
 ];
 
@@ -88,31 +86,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-12">
-                    <NavLink 
-                      to={item.url} 
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${getNavCls(isActive(item.url))}`}
-                    >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {open && <span className="font-medium">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Settings Section */}
-        <SidebarGroup>
-          <SidebarGroupLabel className={!open ? "sr-only" : ""}>
-            Settings
-          </SidebarGroupLabel>
-          
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {commonItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild className="h-12">
                     <NavLink 
